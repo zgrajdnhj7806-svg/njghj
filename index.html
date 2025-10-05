@@ -2,16 +2,19 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>点杂物减次数+鼠标狂抖-抬棺恶搞页</title>
+    <!-- 关键修复：手机端视口适配，避免布局错乱 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>修复手机端-抬棺恶搞页</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body { 
             height: 100vh; overflow: hidden; touch-action: none; 
             background: #000; font-family: Arial, sans-serif;
+            /* 修复手机端滚动溢出，确保元素在屏内 */
+            position: relative;
         }
 
-        /* 1. 背景（你指定图，必显示） */
+        /* 1. 背景（必显示，适配手机） */
         .coffin-bg {
             position: absolute; top: 0; left: 0; width: 100%; height: 200vh;
             background-image: url('https://so1.360tres.com/t015cae4ba521afbf06.jpg');
@@ -20,10 +23,17 @@
         }
         @keyframes roll { 0% { transform: translateY(0); } 100% { transform: translateY(-100vh); } }
 
-        /* 2. 14个大杂物（点到减次数，必显示） */
+        /* 2. 14个大杂物（手机端适配尺寸，不挤） */
         .junk { 
             position: fixed; z-index: 2; user-select: none;
-            cursor: not-allowed; /* 提示“别点我”，故意误导 */
+            cursor: not-allowed;
+        }
+        /* 手机端杂物尺寸微调，避免占满屏 */
+        @media (max-width: 768px) {
+            .junk-coffin { width: 60px; height: 40px; }
+            .junk-coffin::after { width: 45px; height: 22px; top: 8px; left: 8px; }
+            .junk-note { width: 55px; height: 55px; font-size: 48px; }
+            .junk-text { padding: 12px 22px; font-size: 18px; }
         }
         .junk-coffin {
             width: 80px; height: 50px; background: #8B4513;
@@ -43,23 +53,19 @@
             padding: 16px 30px; background: #ff0000; color: #fff;
             font-size: 24px; font-weight: bold; border-radius: 10px;
         }
-        /* 点到杂物变红色，提示“扣次数了” */
-        .junk.clicked {
-            filter: brightness(1.5);
-            transform: scale(1.2);
-            transition: all 0.3s;
-        }
+        .junk.clicked { filter: brightness(1.5); transform: scale(1.2); transition: all 0.3s; }
 
-        /* 3. 中间文案（实时显示次数，扣次数时变红） */
+        /* 3. 中间文案（手机端字体适配，不溢出） */
         .meme {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             color: #ffd700; font-size: 32px; font-weight: bold; text-align: center;
             z-index: 3; width: 90%;
         }
+        @media (max-width: 768px) { .meme { font-size: 24px; } }
         .meme.minus { color: #ff0000; animation: shake 0.5s ease; }
         @keyframes shake { 0% { transform: translate(-50%, -50%) rotate(-5deg); } 50% { transform: translate(-50%, -50%) rotate(5deg); } 100% { transform: translate(-50%, -50%); } }
 
-        /* 4. 500ms瞬移按钮（更显眼，防混淆） */
+        /* 4. 按钮（手机端适配，不偏小） */
         .exit-btn {
             position: fixed; padding: 12px 24px; background: #ff0000;
             color: #fff; border: 3px solid #fff; border-radius: 8px;
@@ -67,18 +73,16 @@
             z-index: 99; width: 140px; text-align: center;
             box-shadow: 0 0 15px #ff0000, 0 0 5px #fff inset;
         }
+        @media (max-width: 768px) { 
+            .exit-btn { padding: 10px 20px; font-size: 16px; width: 130px; }
+        }
         .exit-btn.active { background: #00ff00; color: #000; box-shadow: 0 0 15px #00ff00; }
-
-        /* 5. 鼠标颤抖不影响页面选中 */
-        * { pointer-events: auto; }
-        .exit-btn, .junk { pointer-events: auto; }
     </style>
 </head>
 <body>
-    <!-- 1. 必显示背景 -->
     <div class="coffin-bg"></div>
 
-    <!-- 2. 14个大杂物（点到减1次） -->
+    <!-- 14个杂物（手机端随机分布） -->
     <div class="junk junk-coffin" id="j1"></div>
     <div class="junk junk-note" id="j2">♪</div>
     <div class="junk junk-text" id="j3">别点我！</div>
@@ -94,13 +98,9 @@
     <div class="junk junk-coffin" id="j13"></div>
     <div class="junk junk-note" id="j14">♪</div>
 
-    <!-- 3. 实时次数文案 -->
     <div class="meme" id="memeText">当前：0/5，点杂物扣1次！</div>
-
-    <!-- 4. 500ms瞬移按钮 -->
     <button class="exit-btn" id="exitBtn">点我+1次</button>
 
-    <!-- 5. 音效（扣次数/点对都有声音，更恶心） -->
     <audio id="music" loop>
         <source src="https://cdn.jsdelivr.net/npm/astronomia-mp3@1.0.0/Astronomia.mp3" type="audio/mpeg">
     </audio>
@@ -114,36 +114,44 @@
         const music = document.getElementById('music');
         const minusSound = document.getElementById('minusSound');
         const addSound = document.getElementById('addSound');
-        let clickCount = 0; // 初始0次，满5次退出
-        const btnW = 140;
-        const btnH = 55;
+        let clickCount = 0;
+        // 关键修复：区分手机/电脑，分别获取元素宽高（避免尺寸错误）
+        const isPC = !/Android|iPhone|iPad/.test(navigator.userAgent);
+        const btnW = isPC ? 140 : 130; // 手机端按钮窄一点
+        const btnH = isPC ? 55 : 50;   // 手机端按钮矮一点
 
-        // 1. 随机位置生成（确保元素在屏内）
-        const getPos = () => {
-            const x = Math.floor(Math.random() * (window.innerWidth - btnW));
-            const y = Math.floor(Math.random() * (window.innerHeight - btnH));
+        // 关键修复：手机端随机位置计算（用window.innerWidth/innerHeight，确保全屏随机）
+        const getPos = (element) => {
+            // 先获取当前元素的实际宽高（适配手机端微调后的尺寸）
+            const elemW = element.offsetWidth;
+            const elemH = element.offsetHeight;
+            // 计算最大可移动范围，确保元素完全在屏内（不贴边）
+            const maxX = window.innerWidth - elemW - 10; // 留10px空隙，不贴边
+            const maxY = window.innerHeight - elemH - 10;
+            // 生成真正的随机位置（避免挤在左上角）
+            const x = Math.max(10, Math.floor(Math.random() * maxX)); // 最小10px，不贴左
+            const y = Math.max(10, Math.floor(Math.random() * maxY)); // 最小10px，不贴上
             return { x, y };
         };
 
-        // 2. 按钮500ms瞬移（稳定不卡顿）
+        // 按钮500ms瞬移（修复后手机端全屏随机）
         const moveBtn = () => {
-            const pos = getPos();
+            const pos = getPos(exitBtn);
             exitBtn.style.left = `${pos.x}px`;
             exitBtn.style.top = `${pos.y}px`;
         };
         moveBtn();
         setInterval(moveBtn, 500);
 
-        // 3. 核心：点按钮+1次，满5次退出
+        // 点按钮+1次逻辑
         exitBtn.addEventListener('click', () => {
-            clickCount = Math.min(clickCount + 1, 5); // 最多到5，不超
-            addSound.play(); // 点对音效
+            clickCount = Math.min(clickCount + 1, 5);
+            addSound.play();
             exitBtn.classList.add('active');
-            updateMemeText(false); // 不变红
-            moveBtn(); // 点完立刻瞬移，更难连续点
+            updateMemeText(false);
+            moveBtn();
             setTimeout(() => exitBtn.classList.remove('active'), 600);
             
-            // 满5次退出
             if (clickCount === 5) {
                 memeText.innerText = '终于够了！正在退出...';
                 setTimeout(() => {
@@ -153,23 +161,64 @@
             }
         });
 
-        // 4. 核心：点杂物-1次（最低到0，不出现负数）
+        // 点杂物-1次+随机分布（修复后手机端全屏随机）
         junks.forEach(junk => {
-            // 杂物初始移动+1.2秒自动移
             const moveJunk = () => {
-                const pos = getPos();
+                const pos = getPos(junk); // 传入杂物元素，获取其实际宽高
                 junk.style.left = `${pos.x}px`;
                 junk.style.top = `${pos.y}px`;
             };
-            moveJunk();
+            moveJunk(); // 初始就全屏随机，不挤左上角
             setInterval(moveJunk, 1200);
 
-            // 点杂物扣次数
             junk.addEventListener('click', () => {
-                clickCount = Math.max(clickCount - 1, 0); // 最低0，不扣负
-                minusSound.play(); // 扣次数刺耳音效
-                junk.classList.add('clicked'); // 杂物变红提示
-                updateMemeText(true); // 文案变红+颤抖
-                // 1秒后恢复杂物样式
+                clickCount = Math.max(clickCount - 1, 0);
+                minusSound.play();
+                junk.classList.add('clicked');
+                updateMemeText(true);
                 setTimeout(() => junk.classList.remove('clicked'), 1000);
-       
+            });
+        });
+
+        // 电脑端鼠标颤抖（手机端不执行，避免干扰触摸）
+        let mouseShakeInterval;
+        if (isPC) {
+            setTimeout(() => {
+                mouseShakeInterval = setInterval(() => {
+                    const shakeX = Math.random() * 16 - 8;
+                    const shakeY = Math.random() * 16 - 8;
+                    document.body.style.transform = `translate(${shakeX}px, ${shakeY}px)`;
+                    setTimeout(() => document.body.style.transform = 'translate(0, 0)', 30);
+                }, 50);
+            }, 1000);
+        }
+
+        function updateMemeText(isMinus) {
+            if (isMinus) {
+                memeText.classList.add('minus');
+                memeText.innerText = `当前：${clickCount}/5，扣1次！坑吧！`;
+                setTimeout(() => memeText.classList.remove('minus'), 500);
+            } else {
+                memeText.innerText = `当前：${clickCount}/5，加油！别点杂物！`;
+            }
+        }
+
+        // 音乐激活
+        const playMusic = () => {
+            music.play().catch(() => music.play());
+        };
+        document.addEventListener('click', playMusic, { once: true });
+
+        // 锁网页
+        window.addEventListener('beforeunload', (e) => {
+            e.preventDefault();
+            e.returnValue = '点够5次再关！点杂物会扣哦！';
+            return '点够5次再关！点杂物会扣哦！';
+        });
+
+        window.addEventListener('unload', () => {
+            if (mouseShakeInterval) clearInterval(mouseShakeInterval);
+        });
+    </script>
+</body>
+</html>
