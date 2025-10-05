@@ -3,206 +3,173 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>究极恶心版黑人抬棺锁屏</title>
+    <title>点杂物减次数+鼠标狂抖-抬棺恶搞页</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body { 
-            height: 100vh; 
-            overflow: hidden; 
-            touch-action: none; /* 禁手机所有触屏操作 */
-            background: #000; 
-            margin: 0 !important;
-            padding: 0 !important;
-            font-family: "Arial Black", "Microsoft YaHei", sans-serif;
+            height: 100vh; overflow: hidden; touch-action: none; 
+            background: #000; font-family: Arial, sans-serif;
         }
 
-        /* 1. 锁死网页：退全屏秒拉回、关标签页拦截，彻底没法手动退 */
-        :-webkit-full-screen, :-moz-full-screen, :fullscreen { width: 100%; height: 100%; }
-
-        /* 2. 背景：闪烁+快速滚动，晃眼到吐（你指定的图） */
-        .coffin-scroll {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 200vh;
-            animation: rollY 5s linear infinite, flash 0.3s ease-in-out infinite alternate, shakeBg 0.8s random infinite;
-            z-index: 1;
-            opacity: 0.9;
-        }
-        .coffin-img {
-            width: 100%;
-            height: 100vh;
+        /* 1. 背景（你指定图，必显示） */
+        .coffin-bg {
+            position: absolute; top: 0; left: 0; width: 100%; height: 200vh;
             background-image: url('https://so1.360tres.com/t015cae4ba521afbf06.jpg');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
+            background-size: cover; background-position: center;
+            animation: roll 6s linear infinite; z-index: 1;
         }
-        @keyframes rollY { 0% { transform: translateY(0); } 100% { transform: translateY(-100vh); } }
-        @keyframes flash { 0% { opacity: 0.9; } 100% { opacity: 0.4; } }
-        @keyframes shakeBg { /* 随机晃背景，更恶心 */
-            0% { transform: translateY(-100vh) rotate(-1deg); }
-            50% { transform: translateY(-100vh) rotate(1deg); }
-            100% { transform: translateY(-100vh) rotate(-0.5deg); }
-        }
+        @keyframes roll { 0% { transform: translateY(0); } 100% { transform: translateY(-100vh); } }
 
-        /* 3. 核心干扰1：突然闪出的大遮挡（挡按钮专用，随机出现） */
-        .big-blocker {
-            position: fixed;
-            z-index: 9998; /* 刚好挡按钮，不挡中间文案 */
-            opacity: 0;
-            transition: opacity 0.1s; /* 突然出现，不给反应时间 */
-            user-select: none;
+        /* 2. 14个大杂物（点到减次数，必显示） */
+        .junk { 
+            position: fixed; z-index: 2; user-select: none;
+            cursor: not-allowed; /* 提示“别点我”，故意误导 */
         }
-        /* 遮挡物1：大棺材图 */
-        .blocker-coffin {
-            width: 200px;
-            height: 120px;
-            background-image: url('https://cdn.jsdelivr.net/gh/wangxinleo/coffin-elements/big-coffin.png');
-            background-size: contain;
-            background-repeat: no-repeat;
+        .junk-coffin {
+            width: 80px; height: 50px; background: #8B4513;
+            border-radius: 6px; position: relative;
         }
-        /* 遮挡物2：黑哥大头像 */
-        .blocker-blackguy {
-            width: 180px;
-            height: 180px;
-            border-radius: 50%;
-            background-image: url('https://cdn.jsdelivr.net/gh/wangxinleo/coffin-elements/blackguy-face.png');
-            background-size: cover;
-            background-repeat: no-repeat;
+        .junk-coffin::after {
+            content: ''; position: absolute; top: 10px; left: 10px;
+            width: 60px; height: 30px; background: #A0522D; border-radius: 4px;
         }
-        /* 遮挡物3：超大梗文字（挡完还嘲讽） */
-        .blocker-text {
-            padding: 20px 30px;
-            background: #ff0000;
-            color: #fff;
-            font-size: 24px;
-            font-weight: bold;
-            border: 4px solid #fff;
-            border-radius: 10px;
-            text-shadow: 0 0 15px #000;
-        }
-
-        /* 4. 核心干扰2：满屏飘小杂物（分散注意力，碰不到） */
-        .small-junk {
-            position: fixed;
-            z-index: 10;
-            opacity: 0.8;
-            animation: floatJunk linear infinite;
-            user-select: none;
-        }
-        /* 小杂物1：小棺材 */
-        .junk-small-coffin {
-            width: 50px;
-            height: 30px;
-            background-image: url('https://cdn.jsdelivr.net/gh/wangxinleo/coffin-elements/small-coffin.png');
-            background-size: contain;
-            background-repeat: no-repeat;
-        }
-        /* 小杂物2：音符（配合音乐晃） */
         .junk-note {
-            width: 40px;
-            height: 40px;
-            background-image: url('https://cdn.jsdelivr.net/gh/wangxinleo/coffin-elements/music-note.png');
-            background-size: contain;
-            background-repeat: no-repeat;
+            width: 70px; height: 70px; position: relative;
+            color: #ffd700; font-size: 60px;
+            animation: spin 3s linear infinite;
         }
-        /* 小杂物3：骷髅头 */
-        .junk-skull {
-            width: 45px;
-            height: 45px;
-            background-image: url('https://cdn.jsdelivr.net/gh/wangxinleo/coffin-elements/skull.png');
-            background-size: contain;
-            background-repeat: no-repeat;
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .junk-text {
+            padding: 16px 30px; background: #ff0000; color: #fff;
+            font-size: 24px; font-weight: bold; border-radius: 10px;
+        }
+        /* 点到杂物变红色，提示“扣次数了” */
+        .junk.clicked {
+            filter: brightness(1.5);
+            transform: scale(1.2);
+            transition: all 0.3s;
         }
 
-        /* 5. 中间文案：超快速抖动+变色+放大缩小，晃瞎眼 */
-        .coffin-memes {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            z-index: 20; /* 压过杂物，继续恶心人 */
-            width: 95%;
+        /* 3. 中间文案（实时显示次数，扣次数时变红） */
+        .meme {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            color: #ffd700; font-size: 32px; font-weight: bold; text-align: center;
+            z-index: 3; width: 90%;
         }
-        .meme-text {
-            color: #ffd700;
-            font-size: 40px; /* 电脑端超大字 */
-            font-weight: bold;
-            line-height: 1.7;
-            opacity: 0;
-            animation: shakeText 0.2s ease-in-out infinite alternate, scaleText 0.5s ease-in-out infinite alternate;
-            text-shadow: 0 0 25px #ff0000, 0 0 15px #fff, 0 0 5px #000;
-        }
-        @keyframes shakeText {
-            0% { transform: rotate(-3deg); color: #ffd700; }
-            100% { transform: rotate(3deg); color: #ff3333; }
-        }
-        @keyframes scaleText {
-            0% { transform: scale(1); }
-            100% { transform: scale(1.1); }
-        }
-        @media (max-width: 768px) { .meme-text { font-size: 30px; } }
-        .meme-text.active { opacity: 1; }
+        .meme.minus { color: #ff0000; animation: shake 0.5s ease; }
+        @keyframes shake { 0% { transform: translate(-50%, -50%) rotate(-5deg); } 50% { transform: translate(-50%, -50%) rotate(5deg); } 100% { transform: translate(-50%, -50%); } }
 
-        /* 6. 耍赖按钮：更小+瞬移更快+被遮挡概率拉满 */
+        /* 4. 500ms瞬移按钮（更显眼，防混淆） */
         .exit-btn {
-            position: fixed;
-            padding: 8px 18px;
-            background: #ff0000;
-            color: #fff;
-            border: 2px solid #fff;
-            border-radius: 6px;
-            font-size: 14px; /* 故意做超小，难点到 */
-            font-weight: bold;
-            cursor: pointer;
-            z-index: 9999;
-            box-shadow: 0 0 12px #fff;
-            user-select: none;
-            width: 110px;
-            height: 45px;
-            text-align: center;
-            line-height: 28px;
+            position: fixed; padding: 12px 24px; background: #ff0000;
+            color: #fff; border: 3px solid #fff; border-radius: 8px;
+            font-size: 18px; font-weight: bold; cursor: pointer;
+            z-index: 99; width: 140px; text-align: center;
+            box-shadow: 0 0 15px #ff0000, 0 0 5px #fff inset;
         }
-        .exit-btn.not-enough {
-            background: #00ff00;
-            color: #000;
-            transform: scale(1.1);
-        }
-        /* 一靠近/一戳就瞬移，还带震动 */
-        .exit-btn:hover, .exit-btn:active {
-            transform: scale(1) rotate(5deg);
-            moveBtnInstant();
-        }
+        .exit-btn.active { background: #00ff00; color: #000; box-shadow: 0 0 15px #00ff00; }
 
-        /* 7. 防破解：禁右键、禁选中、禁拖拽，还禁键盘快捷键 */
-        * {
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            -khtml-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-        }
-        body {
-            -webkit-user-drag: none;
-            user-drag: none;
-            overflow: hidden !important;
-        }
+        /* 5. 鼠标颤抖不影响页面选中 */
+        * { pointer-events: auto; }
+        .exit-btn, .junk { pointer-events: auto; }
     </style>
 </head>
 <body>
-    <!-- 1. 闪烁滚动背景 -->
-    <div class="coffin-scroll">
-        <div class="coffin-img"></div>
-        <div class="coffin-img"></div>
-    </div>
+    <!-- 1. 必显示背景 -->
+    <div class="coffin-bg"></div>
 
-    <!-- 2. 突然闪出的遮挡物（3种，随机生成） -->
-    <div class="big-blocker blocker-coffin" id="blocker1"></div>
-    <div class="big-blocker blocker-blackguy" id="blocker2"></div>
-    <div class="big-blocker blocker-text" id="blocker3">挡你按钮！就挡！</div>
+    <!-- 2. 14个大杂物（点到减1次） -->
+    <div class="junk junk-coffin" id="j1"></div>
+    <div class="junk junk-note" id="j2">♪</div>
+    <div class="junk junk-text" id="j3">别点我！</div>
+    <div class="junk junk-coffin" id="j4"></div>
+    <div class="junk junk-note" id="j5">♫</div>
+    <div class="junk junk-text" id="j6">点了减次数！</div>
+    <div class="junk junk-coffin" id="j7"></div>
+    <div class="junk junk-note" id="j8">♪</div>
+    <div class="junk junk-text" id="j9">坑你呢！</div>
+    <div class="junk junk-coffin" id="j10"></div>
+    <div class="junk junk-note" id="j11">♫</div>
+    <div class="junk junk-text" id="j12">哈哈扣了！</div>
+    <div class="junk junk-coffin" id="j13"></div>
+    <div class="junk junk-note" id="j14">♪</div>
 
-    <!-- 3. 满屏飘的小杂物（初始放10个，后续还会加） -->
-    <div class="small-junk junk-small-coffin" 
+    <!-- 3. 实时次数文案 -->
+    <div class="meme" id="memeText">当前：0/5，点杂物扣1次！</div>
+
+    <!-- 4. 500ms瞬移按钮 -->
+    <button class="exit-btn" id="exitBtn">点我+1次</button>
+
+    <!-- 5. 音效（扣次数/点对都有声音，更恶心） -->
+    <audio id="music" loop>
+        <source src="https://cdn.jsdelivr.net/npm/astronomia-mp3@1.0.0/Astronomia.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="minusSound" src="https://cdn.jsdelivr.net/gh/wangxinleo/coffin-music/minus-sound.mp3" type="audio/mpeg"></audio>
+    <audio id="addSound" src="https://cdn.jsdelivr.net/gh/wangxinleo/coffin-music/add-sound.mp3" type="audio/mpeg"></audio>
+
+    <script>
+        const exitBtn = document.getElementById('exitBtn');
+        const memeText = document.getElementById('memeText');
+        const junks = [j1,j2,j3,j4,j5,j6,j7,j8,j9,j10,j11,j12,j13,j14];
+        const music = document.getElementById('music');
+        const minusSound = document.getElementById('minusSound');
+        const addSound = document.getElementById('addSound');
+        let clickCount = 0; // 初始0次，满5次退出
+        const btnW = 140;
+        const btnH = 55;
+
+        // 1. 随机位置生成（确保元素在屏内）
+        const getPos = () => {
+            const x = Math.floor(Math.random() * (window.innerWidth - btnW));
+            const y = Math.floor(Math.random() * (window.innerHeight - btnH));
+            return { x, y };
+        };
+
+        // 2. 按钮500ms瞬移（稳定不卡顿）
+        const moveBtn = () => {
+            const pos = getPos();
+            exitBtn.style.left = `${pos.x}px`;
+            exitBtn.style.top = `${pos.y}px`;
+        };
+        moveBtn();
+        setInterval(moveBtn, 500);
+
+        // 3. 核心：点按钮+1次，满5次退出
+        exitBtn.addEventListener('click', () => {
+            clickCount = Math.min(clickCount + 1, 5); // 最多到5，不超
+            addSound.play(); // 点对音效
+            exitBtn.classList.add('active');
+            updateMemeText(false); // 不变红
+            moveBtn(); // 点完立刻瞬移，更难连续点
+            setTimeout(() => exitBtn.classList.remove('active'), 600);
+            
+            // 满5次退出
+            if (clickCount === 5) {
+                memeText.innerText = '终于够了！正在退出...';
+                setTimeout(() => {
+                    window.close();
+                    setTimeout(() => window.location.href = 'about:blank', 100);
+                }, 800);
+            }
+        });
+
+        // 4. 核心：点杂物-1次（最低到0，不出现负数）
+        junks.forEach(junk => {
+            // 杂物初始移动+1.2秒自动移
+            const moveJunk = () => {
+                const pos = getPos();
+                junk.style.left = `${pos.x}px`;
+                junk.style.top = `${pos.y}px`;
+            };
+            moveJunk();
+            setInterval(moveJunk, 1200);
+
+            // 点杂物扣次数
+            junk.addEventListener('click', () => {
+                clickCount = Math.max(clickCount - 1, 0); // 最低0，不扣负
+                minusSound.play(); // 扣次数刺耳音效
+                junk.classList.add('clicked'); // 杂物变红提示
+                updateMemeText(true); // 文案变红+颤抖
+                // 1秒后恢复杂物样式
+                setTimeout(() => junk.classList.remove('clicked'), 1000);
+       
